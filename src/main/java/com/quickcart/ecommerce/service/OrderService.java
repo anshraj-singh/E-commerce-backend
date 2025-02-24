@@ -5,15 +5,14 @@ import com.quickcart.ecommerce.entity.Order;
 import com.quickcart.ecommerce.entity.Product;
 import com.quickcart.ecommerce.entity.UserEntry;
 import com.quickcart.ecommerce.repository.OrderRepository;
-import com.quickcart.ecommerce.repository.ProductRepository;
 import com.quickcart.ecommerce.repository.UserRepository;
 import com.quickcart.ecommerce.service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
@@ -25,10 +24,10 @@ public class OrderService {
     private UserRepository userRepository;
 
     @Autowired
-    private ProductRepository productRepository;
+    private CartService cartService;
 
     @Autowired
-    private CartService cartService;
+    private UserService userService;
 
 
     public void saveOrder(Order order) {
@@ -41,10 +40,10 @@ public class OrderService {
     }
 
 
-    public Order placeOrderForProduct(String userId, String productId) {
+    public Order placeOrderFromCart(String userId) {
         UserEntry user = userRepository.findById(userId).orElse(null);
         if (user == null) {
-            throw new RuntimeException("User not found!");
+            throw new RuntimeException("User  not found!");
         }
 
         Cart cart = cartService.getCartByUserId(userId).orElse(null);
@@ -52,36 +51,21 @@ public class OrderService {
             throw new RuntimeException("Cart is empty!");
         }
 
-
-        Optional<Product> productOptional = cart.getProductToCart().stream()
-                .filter(p -> p.getId().equals(productId))
-                .findFirst();
-
-        if (productOptional.isEmpty()) {
-            throw new RuntimeException("Product not found in cart!");
-        }
-
-        Product product = productOptional.get();
-
-
         Order order = new Order();
         order.setUserId(userId);
         order.setStatus("Pending");
-        order.setOrderProducts(List.of(product));
-        order.setTotalAmount(product.getPrice());
+        order.setOrderProducts(new ArrayList<>(cart.getProductToCart())); // Ensure products are added correctly
+        order.setTotalAmount(cart.getTotalPrice());
 
         saveOrder(order);
+        userService.addOrderToUser(userId, order); // Use the addOrderToUser  method
 
-        cart.setProductToCart(cart.getProductToCart().stream()
-                .filter(p -> !p.getId().equals(productId))
-                .collect(Collectors.toList()));
-
-        cart.setTotalPrice(cart.getProductToCart().stream().mapToDouble(Product::getPrice).sum());
+        cart.getProductToCart().clear();
+        cart.setTotalPrice(0.0);
         cartService.saveCart(cart);
 
         return order;
     }
-
 
     public List<Order> getAllOrders() {
         return orderRepository.findAll();
@@ -97,4 +81,3 @@ public class OrderService {
         orderRepository.deleteById(orderId);
     }
 }
-

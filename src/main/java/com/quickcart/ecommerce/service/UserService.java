@@ -1,6 +1,7 @@
 package com.quickcart.ecommerce.service;
 
 import com.quickcart.ecommerce.entity.Cart;
+import com.quickcart.ecommerce.entity.Product;
 import com.quickcart.ecommerce.entity.Order;
 import com.quickcart.ecommerce.entity.UserEntry;
 import com.quickcart.ecommerce.repository.UserRepository;
@@ -49,8 +50,11 @@ public class UserService {
     public void addOrderToUser(String userId, Order order) {
         UserEntry user = userRepository.findById(userId).orElse(null);
         if (user != null) {
-            user.getOrders().add(order);
-            userRepository.save(user);
+            // Check if the order already exists
+            if (!user.getOrders().contains(order)) {
+                user.getOrders().add(order);
+                userRepository.save(user);
+            }
         }
     }
 }

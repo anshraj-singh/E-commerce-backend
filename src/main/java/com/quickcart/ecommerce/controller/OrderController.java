@@ -1,7 +1,12 @@
 package com.quickcart.ecommerce.controller;
 
+import com.quickcart.ecommerce.entity.Cart;
 import com.quickcart.ecommerce.entity.Order;
+import com.quickcart.ecommerce.entity.Product;
+import com.quickcart.ecommerce.entity.UserEntry;
+import com.quickcart.ecommerce.service.CartService;
 import com.quickcart.ecommerce.service.OrderService;
+import com.quickcart.ecommerce.service.ProductService;
 import com.quickcart.ecommerce.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,7 +26,13 @@ public class OrderController {
     @Autowired
     private UserService userService;
 
-    //! user can get all orders
+    @Autowired
+    private CartService cartService;
+
+    @Autowired
+    private ProductService productService;
+
+
     @GetMapping("/getAllOrders")
     public ResponseEntity<List<Order>> getAllOrders() {
         List<Order> allOrders = orderService.getAllOrders();
@@ -32,13 +43,43 @@ public class OrderController {
     }
 
 
-    @PostMapping("/placeOrder/{userId}/{productId}")
-    public ResponseEntity<?> placeOrder(@PathVariable String userId, @PathVariable String productId) {
+    //! user can order all products in cart
+    @PostMapping("/placeOrder/{userId}")
+    public ResponseEntity<?> placeOrder(@PathVariable String userId) {
         try {
-            Order order = orderService.placeOrderForProduct(userId, productId);
+            Order order = orderService.placeOrderFromCart(userId);
             return new ResponseEntity<>(order, HttpStatus.CREATED);
         } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Order placement failed!", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    //! user can one by one oder in cart api
+    @PostMapping("/placeSingleOrder/{userId}/{productId}")
+    public ResponseEntity<?> placeSingleOrder(@PathVariable String userId, @PathVariable String productId) {
+        try {
+            // Get the product from the product service
+            Optional<Product> productOpt = productService.getById(productId);
+            if (productOpt.isEmpty()) {
+                return new ResponseEntity<>("Product not found!", HttpStatus.NOT_FOUND);
+            }
+
+            // Create a new order for the single product
+            Order order = new Order();
+            order.setUserId(userId);
+            order.setStatus("Pending");
+            order.setOrderProducts(List.of(productOpt.get())); // Add the single product
+            order.setTotalAmount(productOpt.get().getPrice()); // Set the total amount
+
+            orderService.saveOrder(order); // Save the order
+
+            Cart cart = cartService.getCartByUserId(userId).orElse(null);
+            cart.getProductToCart().clear();
+            cart.setTotalPrice(0.0);
+            cartService.saveCart(cart);
+            return new ResponseEntity<>(order, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Order placement failed!", HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -57,4 +98,3 @@ public class OrderController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
-

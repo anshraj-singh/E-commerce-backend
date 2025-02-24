@@ -19,6 +19,9 @@ public class CartService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private UserService userService;
+
     public void saveCart(Cart cart) {
         cartRepository.save(cart);
     }
@@ -46,8 +49,7 @@ public class CartService {
         if (userOpt.isPresent()) {
             UserEntry user = userOpt.get();
             if (!user.getCarts().contains(cart)) {
-                user.getCarts().add(cart);
-                userRepository.save(user);
+                userService.updateUserCart(userId, cart); // Use the updateUser Cart method
             }
         }
 
