@@ -18,17 +18,17 @@ public class UserController {
     private UserService userService;
 
     @GetMapping("/getAllUsers")
-    public ResponseEntity<List<UserEntry>> getAllUsers(){
-        List<UserEntry> all = userService.getAllUser();
-        if(all != null && !all.isEmpty()){
+    public ResponseEntity<List<UserEntry>> getAllUsers() {
+        List<UserEntry> all = userService.getAllUser ();
+        if (all != null && !all.isEmpty()) {
             return new ResponseEntity<>(all, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @PostMapping("/createUser")
-    public ResponseEntity<?> createUser(@RequestBody UserEntry newEntry){
-        try{
+    public ResponseEntity<?> createUser(@RequestBody UserEntry newEntry) {
+        try {
             userService.saveEntry(newEntry);
             return new ResponseEntity<>(newEntry, HttpStatus.CREATED);
         } catch (Exception e) {
@@ -36,46 +36,38 @@ public class UserController {
         }
     }
 
-    @GetMapping("id/{myId}")
-    public ResponseEntity<UserEntry> getUserById(@PathVariable String myId){
+    @GetMapping("/id/{myId}")
+    public ResponseEntity<?> getUserById(@PathVariable String myId) {
         Optional<UserEntry> entry = userService.getById(myId);
-        if(entry.isPresent()){
-            return new ResponseEntity<>(entry.get(),HttpStatus.OK);
+        if (entry.isPresent()) {
+            return new ResponseEntity<>(entry.get(), HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @DeleteMapping("id/{myId}")
-    public ResponseEntity<UserEntry> deleteUserById(@PathVariable String myId){
+    @DeleteMapping("/id/{myId}")
+    public ResponseEntity<Void> deleteUserById(@PathVariable String myId) {
         userService.deleteById(myId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PutMapping("id/{myId}")
-    public ResponseEntity<UserEntry> updateEntryById(@PathVariable String myId,@RequestBody UserEntry newEntry){
+    @PutMapping("/id/{myId}")
+    public ResponseEntity<UserEntry> updateEntryById(@PathVariable String myId, @RequestBody UserEntry newEntry) {
         UserEntry old = userService.getById(myId).orElse(null);
-        if(old != null){
-            if(newEntry.getUsername() != null && !newEntry.getUsername().isEmpty()){
+        if (old != null) {
+            if (newEntry.getUsername() != null && !newEntry.getUsername().isEmpty()) {
                 old.setUsername(newEntry.getUsername());
-            }else{
-                old.setUsername(old.getUsername());
             }
-
-            if(newEntry.getPassword() != null && !newEntry.getPassword().isEmpty()){
-                old.setPassword(newEntry.getPassword());
-            }else{
+            if (newEntry.getPassword() != null && !newEntry.getPassword().isEmpty()) {
                 old.setPassword(newEntry.getPassword());
             }
-
-            if(newEntry.getEmail() != null && !newEntry.getEmail().isEmpty()){
-                old.setEmail(newEntry.getEmail());
-            }else{
+            if (newEntry.getEmail() != null && !newEntry.getEmail().isEmpty()) {
                 old.setEmail(newEntry.getEmail());
             }
-
-            return new ResponseEntity<>(HttpStatus.OK);
+            userService.saveEntry(old);
+            return new ResponseEntity<>(old, HttpStatus.OK);
         }
-        userService.saveEntry(old);
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }
+
