@@ -25,9 +25,9 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/admin/**").hasRole("ADMIN") // Only ROLE_ADMIN can access /admin/*
-                .antMatchers("/user/createUser").permitAll() // Allow public access to user creation
                 .antMatchers("/user/me","/update-user").authenticated() // Require authentication for accessing user info
-                .anyRequest().authenticated() // Require authentication for all other requests
+                .antMatchers("/cart/**","/order/**").authenticated()
+                .anyRequest().permitAll()
                 .and()
                 .httpBasic(); // Enable basic authentication
 

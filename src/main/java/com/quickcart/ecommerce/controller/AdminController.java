@@ -1,6 +1,8 @@
 package com.quickcart.ecommerce.controller;
 
+import com.quickcart.ecommerce.entity.Order;
 import com.quickcart.ecommerce.entity.UserEntry;
+import com.quickcart.ecommerce.service.OrderService;
 import com.quickcart.ecommerce.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,6 +17,9 @@ public class AdminController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private OrderService orderService;
 
     @GetMapping("/getAllUsers")
     public ResponseEntity<List<UserEntry>> getAllUsers() {
@@ -39,5 +44,14 @@ public class AdminController {
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @GetMapping("/getAllOrders")
+    public ResponseEntity<List<Order>> getAllOrders() {
+        List<Order> allOrders = orderService.getAllOrders();
+        if (!allOrders.isEmpty()) {
+            return new ResponseEntity<>(allOrders, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }

@@ -11,6 +11,8 @@ import com.quickcart.ecommerce.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,31 +34,51 @@ public class OrderController {
     @Autowired
     private ProductService productService;
 
-
-    @GetMapping("/getAllOrders")
+    // Get all orders for the authenticated user
+    @GetMapping("/me")
     public ResponseEntity<List<Order>> getAllOrders() {
-        List<Order> allOrders = orderService.getAllOrders();
-        if (!allOrders.isEmpty()) {
-            return new ResponseEntity<>(allOrders, HttpStatus.OK);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        UserEntry user = userService.findByUsername(username).orElse(null);
+
+        if (user == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        List<Order> allOrders = orderService.getAllOrdersByUserId(user.getId());
+        return new ResponseEntity<>(allOrders, HttpStatus.OK);
     }
 
+    // Place an order from the user's cart
+    @PostMapping("/placeOrder")
+    public ResponseEntity<?> placeOrder() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        UserEntry user = userService.findByUsername(username).orElse(null);
 
-    //! user can order all products in cart
-    @PostMapping("/placeOrder/{userId}")
-    public ResponseEntity<?> placeOrder(@PathVariable String userId) {
+        if (user == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
         try {
-            Order order = orderService.placeOrderFromCart(userId);
+            Order order = orderService.placeOrderFromCart(user.getId());
             return new ResponseEntity<>(order, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>("Order placement failed!", HttpStatus.BAD_REQUEST);
         }
     }
 
-    //! user can one by one oder in cart api
-    @PostMapping("/placeSingleOrder/{userId}/{productId}")
-    public ResponseEntity<?> placeSingleOrder(@PathVariable String userId, @PathVariable String productId) {
+    // User can place a single order for a product
+    @PostMapping("/placeSingleOrder/{productId}")
+    public ResponseEntity<?> placeSingleOrder(@PathVariable String productId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        UserEntry user = userService.findByUsername(username).orElse(null);
+
+        if (user == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
         try {
             // Get the product from the product service
             Optional<Product> productOpt = productService.getById(productId);
@@ -66,17 +88,19 @@ public class OrderController {
 
             // Create a new order for the single product
             Order order = new Order();
-            order.setUserId(userId);
+            order.setUserId(user.getId());
             order.setStatus("Pending");
             order.setOrderProducts(List.of(productOpt.get())); // Add the single product
             order.setTotalAmount(productOpt.get().getPrice()); // Set the total amount
 
             orderService.saveOrder(order); // Save the order
 
-            Cart cart = cartService.getCartByUserId(userId).orElse(null);
-            cart.getProductToCart().clear();
-            cart.setTotalPrice(0.0);
-            cartService.saveCart(cart);
+            Cart cart = cartService.getCartByUserId(user.getId()).orElse(null);
+            if (cart != null) {
+                cart.getProductToCart().clear();
+                cart.setTotalPrice(0.0);
+                cartService.saveCart(cart);
+            }
             return new ResponseEntity<>(order, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>("Order placement failed!", HttpStatus.BAD_REQUEST);
@@ -84,17 +108,39 @@ public class OrderController {
     }
 
 
+
     @GetMapping("/id/{orderId}")
     public ResponseEntity<?> getOrderById(@PathVariable String orderId) {
-        Optional<Order> order = orderService.getById(orderId);
-        return order.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
-    }
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        UserEntry user = userService.findByUsername(username).orElse(null);
 
+        if (user == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        Optional<Order> order = orderService.getById(orderId);
+        if (order.isPresent() && order.get().getUserId().equals(user.getId())) {
+            return new ResponseEntity<>(order.get(), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
 
     @DeleteMapping("/id/{orderId}")
     public ResponseEntity<?> deleteOrderById(@PathVariable String orderId) {
-        orderService.deleteById(orderId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        UserEntry user = userService.findByUsername(username).orElse(null);
+
+        if (user == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        Optional<Order> order = orderService.getById(orderId);
+        if (order.isPresent() && order.get().getUserId().equals(user.getId())) {
+            orderService.deleteById(orderId);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }

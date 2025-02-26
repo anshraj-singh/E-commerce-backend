@@ -182,3 +182,20 @@ This project implements user authentication and authorization using Spring Secur
 To test the authentication and authorization features, use tools like Postman to send requests to the specified endpoints, ensuring to include authentication headers where required.
 
 This setup provides a robust foundation for managing user access and securing your application.
+
+
+## Recent Updates
+
+### Security Enhancements
+
+1. **User  ID Handling**:
+    - Removed the need to pass user IDs as path variables in the `CartController` and `OrderController`.
+    - Instead, the authenticated user's ID is now retrieved from the security context, ensuring that users can only access their own cart and orders.
+
+2. **Controller Updates**:
+    - Modified methods in the `CartController` and `OrderController` to utilize the authenticated user's ID.
+    - This change enhances security by preventing unauthorized access to other users' carts and orders.
+
+3. **Security Context Usage**:
+    - Implemented the use of the security context to fetch the current user's information in methods that require access to the user's cart or orders.
+    - This ensures that all operations are performed in the context of the authenticated user.
