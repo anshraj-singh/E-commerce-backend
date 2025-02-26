@@ -5,6 +5,8 @@ import com.quickcart.ecommerce.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,17 +19,8 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @GetMapping("/getAllUsers")
-    public ResponseEntity<List<UserEntry>> getAllUsers() {
-        List<UserEntry> all = userService.getAllUser ();
-        if (all != null && !all.isEmpty()) {
-            return new ResponseEntity<>(all, HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
-
     @PostMapping("/createUser")
-    public ResponseEntity<?> createUser(@RequestBody UserEntry newEntry) {
+    public ResponseEntity<?> createUser (@RequestBody UserEntry newEntry) {
         try {
             userService.saveEntry(newEntry);
             return new ResponseEntity<>(newEntry, HttpStatus.CREATED);
@@ -36,38 +29,37 @@ public class UserController {
         }
     }
 
-    @GetMapping("/id/{myId}")
-    public ResponseEntity<?> getUserById(@PathVariable String myId) {
-        Optional<UserEntry> entry = userService.getById(myId);
-        if (entry.isPresent()) {
-            return new ResponseEntity<>(entry.get(), HttpStatus.OK);
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        UserEntry user = userService.findByUsername(username).orElse(null);
+        if (user != null) {
+            return new ResponseEntity<>(user, HttpStatus.OK);
         }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>("User  not found", HttpStatus.NOT_FOUND);
     }
 
-    @DeleteMapping("/id/{myId}")
-    public ResponseEntity<Void> deleteUserById(@PathVariable String myId) {
-        userService.deleteById(myId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
+    //! update user by basic auth itself
+    @PutMapping("/update-user")
+    public ResponseEntity<?> updateUser (@RequestBody UserEntry newEntry) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        UserEntry userInDb = userService.findByUsername(username).orElse(null);
 
-    @PutMapping("/id/{myId}")
-    public ResponseEntity<UserEntry> updateEntryById(@PathVariable String myId, @RequestBody UserEntry newEntry) {
-        UserEntry old = userService.getById(myId).orElse(null);
-        if (old != null) {
+        if (userInDb != null) {
             if (newEntry.getUsername() != null && !newEntry.getUsername().isEmpty()) {
-                old.setUsername(newEntry.getUsername());
+                userInDb.setUsername(newEntry.getUsername());
             }
             if (newEntry.getPassword() != null && !newEntry.getPassword().isEmpty()) {
-                old.setPassword(newEntry.getPassword());
+                userInDb.setPassword(newEntry.getPassword()); // Consider hashing the password here
             }
             if (newEntry.getEmail() != null && !newEntry.getEmail().isEmpty()) {
-                old.setEmail(newEntry.getEmail());
+                userInDb.setEmail(newEntry.getEmail());
             }
-            userService.saveEntry(old);
-            return new ResponseEntity<>(old, HttpStatus.OK);
+            userService.saveEntry(userInDb);
+            return new ResponseEntity<>(HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }
-

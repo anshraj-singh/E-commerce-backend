@@ -155,3 +155,30 @@ Response: Returns the details of a specific order.
 DELETE /order/id/{orderId}
 Response: Deletes the order and returns 204 No Content.
 ```
+
+# Authentication and Authorization with Spring Security
+
+This project implements user authentication and authorization using Spring Security. The following features are included:
+
+1. **User  Registration**: Users can create accounts via the `/user/createUser ` endpoint, which is publicly accessible.
+
+2. **User  Authentication**: Basic authentication is enabled, allowing users to log in and access their information.
+
+3. **Role-Based Access Control**:
+    - Admins can access endpoints under `/admin/**` (e.g., retrieving and deleting users).
+    - Users can access their own information via `/user/me` and update their details at `/user/update-user`.
+
+4. **Password Security**: User passwords are securely hashed using BCrypt before being stored in the database.
+
+5. **Stateless Session Management**: The application is configured to use stateless session management, enhancing security.
+
+### Configuration
+
+- **Spring Security Configuration**: The `SpringSecurityConfig` class configures HTTP security, user authentication, and password encoding.
+- **Custom User Details Service**: The `CustomeUser DetailsService` retrieves user details for authentication.
+
+### Usage
+
+To test the authentication and authorization features, use tools like Postman to send requests to the specified endpoints, ensuring to include authentication headers where required.
+
+This setup provides a robust foundation for managing user access and securing your application.
