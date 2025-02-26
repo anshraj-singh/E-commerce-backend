@@ -30,4 +30,14 @@ public class AdminController {
         userService.deleteById(myId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    @PostMapping("/create-admin-user")
+    public ResponseEntity<?> createUser(@RequestBody UserEntry admin){
+        try {
+            userService.saveAdmin(admin);
+            return new ResponseEntity<>(admin, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
 }

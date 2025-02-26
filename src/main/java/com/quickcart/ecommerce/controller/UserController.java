@@ -22,7 +22,7 @@ public class UserController {
     @PostMapping("/createUser")
     public ResponseEntity<?> createUser (@RequestBody UserEntry newEntry) {
         try {
-            userService.saveEntry(newEntry);
+            userService.saveUser(newEntry);
             return new ResponseEntity<>(newEntry, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -57,7 +57,7 @@ public class UserController {
             if (newEntry.getEmail() != null && !newEntry.getEmail().isEmpty()) {
                 userInDb.setEmail(newEntry.getEmail());
             }
-            userService.saveEntry(userInDb);
+            userService.saveUser(userInDb);
             return new ResponseEntity<>(HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
