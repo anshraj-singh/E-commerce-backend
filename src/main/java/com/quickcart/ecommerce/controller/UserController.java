@@ -2,11 +2,18 @@ package com.quickcart.ecommerce.controller;
 
 import com.quickcart.ecommerce.entity.UserEntry;
 import com.quickcart.ecommerce.service.UserService;
+import com.quickcart.ecommerce.utills.JwtUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,18 +21,42 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/user")
+@Slf4j
 public class UserController {
 
     @Autowired
     private UserService userService;
 
-    @PostMapping("/createUser")
-    public ResponseEntity<?> createUser (@RequestBody UserEntry newEntry) {
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @PostMapping("/signup")
+    public ResponseEntity<String> signup(@RequestBody UserEntry newUser ) {
         try {
-            userService.saveUser(newEntry);
-            return new ResponseEntity<>(newEntry, HttpStatus.CREATED);
+            userService.saveUser (newUser );
+            return new ResponseEntity<>("User  registered successfully", HttpStatus.CREATED);
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            log.error("Error during signup", e);
+            return new ResponseEntity<>("User  registration failed", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody UserEntry newUser ) {
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(newUser .getUsername(), newUser .getPassword()));
+            UserDetails userDetails = userDetailsService.loadUserByUsername(newUser .getUsername());
+            String jwt = jwtUtil.generateToken(userDetails.getUsername());
+            return new ResponseEntity<>(jwt, HttpStatus.OK);
+        } catch (AuthenticationException e) {
+            log.error("Invalid login attempt", e);
+            return new ResponseEntity<>("Incorrect username or password", HttpStatus.BAD_REQUEST);
         }
     }
 

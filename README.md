@@ -199,3 +199,36 @@ This setup provides a robust foundation for managing user access and securing yo
 3. **Security Context Usage**:
     - Implemented the use of the security context to fetch the current user's information in methods that require access to the user's cart or orders.
     - This ensures that all operations are performed in the context of the authenticated user.
+
+
+# QuickCart E-commerce Application[UPDATE add JWT authentication]
+
+## JWT Authentication
+The application uses JWT for user authentication. Upon successful login, a JWT token is generated and must be included in the Authorization header for subsequent requests.
+
+## Overview
+QuickCart is an e-commerce application that allows users to register, log in, and manage their accounts. This application implements JWT (JSON Web Token) authentication for secure user sessions.
+
+## Features
+- User signup and login
+- JWT token generation for authentication
+- Secure endpoints for user account management
+
+## Recent Updates
+
+### JWT Authentication
+- Implemented JWT for user authentication.
+- Added a `JwtUtil` class to handle token generation and validation.
+- Integrated a `JwtFilter` to validate tokens on incoming requests.
+- Updated `SpringSecurityConfig` to include JWT authentication.
+
+### User Controller Enhancements
+- Added `signup` endpoint to allow new users to register.
+- Added `login` endpoint to authenticate users and generate JWT tokens upon successful login.
+
+## API Endpoints
+- `POST /user/signup`: Register a new user.
+- `POST /user/login`: Authenticate a user and receive a JWT token.
+- `GET /user/me`: Retrieve the current user's information (requires authentication).
+- `PUT /user/update-user`: Update user information (requires authentication).
+
