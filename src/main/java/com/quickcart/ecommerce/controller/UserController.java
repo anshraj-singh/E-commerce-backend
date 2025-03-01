@@ -1,6 +1,7 @@
 package com.quickcart.ecommerce.controller;
 
 import com.quickcart.ecommerce.entity.UserEntry;
+import com.quickcart.ecommerce.service.EmailService;
 import com.quickcart.ecommerce.service.UserService;
 import com.quickcart.ecommerce.utills.JwtUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -36,10 +37,20 @@ public class UserController {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private EmailService emailService;
+
+
     @PostMapping("/signup")
     public ResponseEntity<String> signup(@RequestBody UserEntry newUser ) {
         try {
-            userService.saveUser (newUser );
+            userService.saveUser(newUser);
+
+            // Send confirmation email
+            String subject = "Welcome to QuickCart!";
+            String body = "Dear " + newUser .getUsername() + ",\n\nThank you for registering with QuickCart!";
+            emailService.sendEmail(newUser.getEmail(), subject, body);
+
             return new ResponseEntity<>("User  registered successfully", HttpStatus.CREATED);
         } catch (Exception e) {
             log.error("Error during signup", e);
