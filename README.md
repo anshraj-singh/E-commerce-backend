@@ -232,3 +232,25 @@ QuickCart is an e-commerce application that allows users to register, log in, an
 - `GET /user/me`: Retrieve the current user's information (requires authentication).
 - `PUT /user/update-user`: Update user information (requires authentication).
 
+## E-Commerce Application with Stripe Payment Integration
+
+### Overview
+This project is an e-commerce application that integrates Stripe for payment processing. It allows users to place orders and handle payments seamlessly. The key components include the `PaymentService`, `OrderController`, and related classes such as `ProductRequest` and `StripeResponse`.
+
+### Features
+- **User  Authentication**: Secure user login and registration.
+- **Order Management**: Users can place orders directly from their cart.
+- **Stripe Payment Integration**: Create payment sessions using Stripe's API, allowing users to complete transactions securely.
+- **Error Handling**: Comprehensive error handling for payment and order placement.
+
+### Stripe Payment Integration
+This project integrates Stripe for secure payment processing, allowing users to complete transactions efficiently and safely.
+
+#### Features
+- **Secure Payments**: Utilizes Stripe's API for secure transactions.
+- **Payment Sessions**: Automatically creates payment sessions for each order, streamlining the checkout process.
+- **Error Handling**: Comprehensive error management for payment failures and session creation issues.
+
+#### Usage
+- To initiate a payment, send a POST request to /order/placeOrder after the user is authenticated. The request should include the necessary order details.
+- Upon successful payment, users will be redirected to a confirmation page.

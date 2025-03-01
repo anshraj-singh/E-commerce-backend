@@ -1,13 +1,7 @@
 package com.quickcart.ecommerce.controller;
 
-import com.quickcart.ecommerce.entity.Cart;
-import com.quickcart.ecommerce.entity.Order;
-import com.quickcart.ecommerce.entity.Product;
-import com.quickcart.ecommerce.entity.UserEntry;
-import com.quickcart.ecommerce.service.CartService;
-import com.quickcart.ecommerce.service.OrderService;
-import com.quickcart.ecommerce.service.ProductService;
-import com.quickcart.ecommerce.service.UserService;
+import com.quickcart.ecommerce.entity.*;
+import com.quickcart.ecommerce.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +27,9 @@ public class OrderController {
 
     @Autowired
     private ProductService productService;
+
+    @Autowired
+    private PaymentService paymentService;
 
     // Get all orders for the authenticated user
     @GetMapping("/me")
@@ -62,7 +59,27 @@ public class OrderController {
 
         try {
             Order order = orderService.placeOrderFromCart(user.getId());
-            return new ResponseEntity<>(order, HttpStatus.CREATED);
+            double totalAmount = order.getTotalAmount(); // Get the total amount from the order
+
+            // Assuming totalAmount is in INR
+            double conversionRate = 87.50; // Example conversion rate: 1 USD = 87.50 INR
+            double amountInUSD = totalAmount / conversionRate; // Convert INR to USD
+
+            // Create a ProductRequest object to pass to the PaymentService
+            ProductRequest productRequest = new ProductRequest();
+            productRequest.setName("Order for " + order.getId());
+            productRequest.setAmount((long) (amountInUSD * 100)); // Amount in cents
+            productRequest.setCurrency("usd");
+            productRequest.setQuantity(1L); // Assuming one item for simplicity
+
+            // Call the payment service to create a payment session
+            StripeResponse stripeResponse = paymentService.checkoutProducts(productRequest);
+
+            if ("SUCCESS".equals(stripeResponse.getStatus())) {
+                return new ResponseEntity<>(stripeResponse.getSessionUrl(), HttpStatus.CREATED); // Return the payment link
+            } else {
+                return new ResponseEntity<>(stripeResponse.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            }
         } catch (Exception e) {
             return new ResponseEntity<>("Order placement failed!", HttpStatus.BAD_REQUEST);
         }
