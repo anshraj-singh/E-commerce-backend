@@ -254,3 +254,23 @@ This project integrates Stripe for secure payment processing, allowing users to 
 #### Usage
 - To initiate a payment, send a POST request to /order/placeOrder after the user is authenticated. The request should include the necessary order details.
 - Upon successful payment, users will be redirected to a confirmation page.
+
+## Updates to the Cart System
+
+### 1. Cart and CartItem Entities
+- **CartItem Class**: Represents an item in the cart, including a reference to the product and its quantity.
+- **Cart Class**: Represents the user's cart, which contains a list of `CartItem` objects and calculates the total price based on the items.
+
+### 2. Stock Management
+- When a user adds a product to the cart with a specified quantity, the stock of that product is decremented accordingly. This ensures that the available stock is accurately reflected in the system.
+
+### 3. User Cart Association
+- The `User Entry` class has been updated to maintain a list of carts associated with the user. This allows for better management of user-specific cart data.
+
+### 4. CartService Enhancements
+- The `CartService` class has been modified to handle the addition of products with quantities. It now decrements the stock of the product when it is added to the cart.
+- The total price of the cart is calculated based on the quantities of the items in the cart.
+
+### 5. CartController Updates
+- The `CartController` has been updated to handle HTTP requests related to adding items to the cart, including checking for stock availability and managing the cart's contents.
+

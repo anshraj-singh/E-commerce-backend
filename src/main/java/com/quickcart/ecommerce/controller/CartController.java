@@ -43,9 +43,9 @@ public class CartController {
         return cart.map(ResponseEntity::ok).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    // Add product to cart using productId
-    @PostMapping("/addItem/{productId}")
-    public ResponseEntity<Cart> addItemToCart(@PathVariable String productId) {
+    // Add product to cart using productId and quantity
+    @PostMapping("/addItem/{productId}/{quantity}")
+    public ResponseEntity<Cart> addItemToCart(@PathVariable String productId, @PathVariable int quantity) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         UserEntry user = userService.findByUsername(username).orElse(null);
@@ -59,7 +59,13 @@ public class CartController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Product not found
         }
 
-        Cart updatedCart = cartService.addProductToCart(user.getId(), productOpt.get());
+        // Check if the requested quantity is available in stock
+        Product product = productOpt.get();
+        if (quantity > product.getStock()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // Not enough stock
+        }
+
+        Cart updatedCart = cartService.addProductToCart(user.getId(), product, quantity);
         return new ResponseEntity<>(updatedCart, HttpStatus.OK);
     }
 

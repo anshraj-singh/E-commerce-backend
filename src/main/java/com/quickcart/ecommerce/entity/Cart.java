@@ -17,7 +17,5 @@ public class Cart {
     private String userId; // ID of the user who owns the cart
     private double totalPrice; // Total price of items in the cart
 
-    @DBRef
-    private List<Product> productToCart = new ArrayList<>();
+    private List<CartItem> items = new ArrayList<>(); // List of items in the cart
 }
-

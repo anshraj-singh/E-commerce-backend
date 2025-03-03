@@ -1,12 +1,8 @@
 package com.quickcart.ecommerce.service;
 
-import com.quickcart.ecommerce.entity.Cart;
-import com.quickcart.ecommerce.entity.Order;
-import com.quickcart.ecommerce.entity.Product;
-import com.quickcart.ecommerce.entity.UserEntry;
+import com.quickcart.ecommerce.entity.*;
 import com.quickcart.ecommerce.repository.OrderRepository;
 import com.quickcart.ecommerce.repository.UserRepository;
-import com.quickcart.ecommerce.service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,10 +22,6 @@ public class OrderService {
     @Autowired
     private CartService cartService;
 
-    @Autowired
-    private UserService userService;
-
-
     public void saveOrder(Order order) {
         orderRepository.save(order);
         UserEntry user = userRepository.findById(order.getUserId()).orElse(null);
@@ -39,7 +31,6 @@ public class OrderService {
         }
     }
 
-
     public Order placeOrderFromCart(String userId) {
         UserEntry user = userRepository.findById(userId).orElse(null);
         if (user == null) {
@@ -47,20 +38,27 @@ public class OrderService {
         }
 
         Cart cart = cartService.getCartByUserId(userId).orElse(null);
-        if (cart == null || cart.getProductToCart().isEmpty()) {
+        if (cart == null || cart.getItems().isEmpty()) {
             throw new RuntimeException("Cart is empty!");
         }
 
         Order order = new Order();
         order.setUserId(userId);
         order.setStatus("Pending");
-        order.setOrderProducts(new ArrayList<>(cart.getProductToCart())); // Ensure products are added correctly
-        order.setTotalAmount(cart.getTotalPrice());
+        order.setOrderProducts(new ArrayList<>()); // Initialize the order products
 
+        double totalAmount = 0.0;
+
+        for (CartItem item : cart.getItems()) {
+            order.getOrderProducts().add(item.getProduct()); // Add product to order
+            totalAmount += item.getProduct().getPrice() * item.getQuantity(); // Calculate total amount
+        }
+
+        order.setTotalAmount(totalAmount);
         saveOrder(order);
-        userService.addOrderToUser(userId, order); // Use the addOrderToUser  method
 
-        cart.getProductToCart().clear();
+        // Clear the cart after placing the order
+        cart.getItems().clear();
         cart.setTotalPrice(0.0);
         cartService.saveCart(cart);
 
@@ -75,11 +73,9 @@ public class OrderService {
         return orderRepository.findAll();
     }
 
-
     public Optional<Order> getById(String orderId) {
         return orderRepository.findById(orderId);
     }
-
 
     public void deleteById(String orderId) {
         orderRepository.deleteById(orderId);

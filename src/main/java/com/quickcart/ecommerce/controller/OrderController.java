@@ -86,8 +86,8 @@ public class OrderController {
     }
 
     // User can place a single order for a product
-    @PostMapping("/placeSingleOrder/{productId}")
-    public ResponseEntity<?> placeSingleOrder(@PathVariable String productId) {
+    @PostMapping("/placeSingleOrder/{productId}/{quantity}")
+    public ResponseEntity<?> placeSingleOrder(@PathVariable String productId, @PathVariable int quantity) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         UserEntry user = userService.findByUsername(username).orElse(null);
@@ -103,27 +103,39 @@ public class OrderController {
                 return new ResponseEntity<>("Product not found!", HttpStatus.NOT_FOUND);
             }
 
+            Product product = productOpt.get();
+
+            // Check if the requested quantity is available in stock
+            if (quantity > product.getStock()) {
+                return new ResponseEntity<>("Not enough stock available!", HttpStatus.BAD_REQUEST);
+            }
+
             // Create a new order for the single product
             Order order = new Order();
             order.setUserId(user.getId());
             order.setStatus("Pending");
-            order.setOrderProducts(List.of(productOpt.get())); // Add the single product
-            order.setTotalAmount(productOpt.get().getPrice()); // Set the total amount
+            order.setOrderProducts(List.of(product)); // Add the single product
+            order.setTotalAmount(product.getPrice() * quantity); // Set the total amount based on quantity
 
             orderService.saveOrder(order); // Save the order
 
+            // Update the product stock
+            product.setStock(product.getStock() - quantity);
+            productService.saveProduct(product); // Save the updated product
+
+            // Clear the cart if needed
             Cart cart = cartService.getCartByUserId(user.getId()).orElse(null);
             if (cart != null) {
-                cart.getProductToCart().clear();
-                cart.setTotalPrice(0.0);
-                cartService.saveCart(cart);
+                cart.getItems().clear(); // Clear the cart items
+                cart.setTotalPrice(0.0); // Reset total price
+                cartService.saveCart(cart); // Save the updated cart
             }
+
             return new ResponseEntity<>(order, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>("Order placement failed!", HttpStatus.BAD_REQUEST);
         }
     }
-
 
 
     @GetMapping("/id/{orderId}")
