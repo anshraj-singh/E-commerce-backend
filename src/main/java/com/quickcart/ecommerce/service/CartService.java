@@ -3,6 +3,7 @@ package com.quickcart.ecommerce.service;
 import com.quickcart.ecommerce.entity.Cart;
 import com.quickcart.ecommerce.entity.CartItem;
 import com.quickcart.ecommerce.entity.Product;
+import com.quickcart.ecommerce.entity.UserEntry;
 import com.quickcart.ecommerce.repository.CartRepository;
 import com.quickcart.ecommerce.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,9 +61,21 @@ public class CartService {
         // Save the updated product
         productService.saveProduct(product);
 
-        return cartRepository.save(cart);
+        // Save the cart and update the user's cart list
+        Cart savedCart = cartRepository.save(cart);
+        updateUserCart(userId, savedCart); // Update user's cart list
+
+        return savedCart;
     }
 
+    // Update user's cart list
+    private void updateUserCart(String userId, Cart cart) {
+        UserEntry user = userRepository.findById(userId).orElse(null);
+        if (user != null) {
+            user.getCarts().add(cart);
+            userRepository.save(user);
+        }
+    }
 
     // Remove product from cart
     public void removeProductFromCart(String userId, String productId) {
