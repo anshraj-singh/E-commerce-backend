@@ -32,7 +32,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/admin/**").hasRole("ADMIN") // Only ROLE_ADMIN can access /admin/*
                 .antMatchers("/user/me","/update-user").authenticated() // Require authentication for accessing user info
-                .antMatchers("/cart/**","/order/**").authenticated()
+                .antMatchers("/cart/**","/order/**","/wishlist/**").authenticated()
                 .anyRequest().permitAll();
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS); // For REST APIs
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

@@ -274,3 +274,38 @@ This project integrates Stripe for secure payment processing, allowing users to 
 ### 5. CartController Updates
 - The `CartController` has been updated to handle HTTP requests related to adding items to the cart, including checking for stock availability and managing the cart's contents.
 
+
+## Wishlist Functionality
+
+The Wishlist feature allows users to create and manage a list of products they are interested in purchasing later. This functionality enhances user experience by enabling them to save products for future reference.
+
+### Features
+
+- **Create Wishlist**: Automatically creates a wishlist for users upon their first access.
+- **Add Products**: Users can add products to their wishlist.
+- **Remove Products**: Users can remove products from their wishlist.
+- **View Wishlist**: Users can view all products in their wishlist.
+
+### API Endpoints
+
+- **Get User's Wishlist**
+    - `GET /wishlist/me`
+    - Retrieves the wishlist for the authenticated user.
+
+- **Add Product to Wishlist**
+    - `POST /wishlist/add/{productId}`
+    - Adds a specified product to the authenticated user's wishlist.
+
+- **Remove Product from Wishlist**
+    - `DELETE /wishlist/remove/{productId}`
+    - Removes a specified product from the authenticated user's wishlist.
+
+### Implementation Details
+
+1. **Entity**: A new `Wishlist` entity was created to represent the user's wishlist.
+2. **Repository**: A `WishlistRepository` interface was added to handle database operations.
+3. **Service**: A `WishlistService` class was implemented to manage business logic related to wishlists.
+4. **Controller**: A `WishlistController` class was created to expose the API endpoints for wishlist operations.
+5. **Security**: The wishlist endpoints are secured to ensure that only authenticated users can access them.
+
+This feature enhances the overall functionality of the e-commerce platform, providing users with a convenient way to manage their desired products.
