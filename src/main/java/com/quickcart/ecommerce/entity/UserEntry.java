@@ -17,6 +17,8 @@ public class UserEntry {
     private String username;
     private String password; // Store hashed password
     private String email;
+    private String address;
+    private String phoneNumber;
     private List<String> roles; // e.g., ["ROLE_USER", "ROLE_ADMIN"]
 
     @DBRef

@@ -48,23 +48,4 @@ public class UserService {
     public Optional<UserEntry> findByUsername(String username) {
         return Optional.ofNullable(userRepository.findByUsername(username));
     }
-
-    public void updateUserCart(String userId, Cart cart) {
-        UserEntry user = userRepository.findById(userId).orElse(null);
-        if (user != null) {
-            user.getCarts().add(cart);
-            userRepository.save(user);
-        }
-    }
-
-    public void addOrderToUser (String userId, Order order) {
-        UserEntry user = userRepository.findById(userId).orElse(null);
-        if (user != null) {
-            // Check if the order already exists
-            if (!user.getOrders().contains(order)) {
-                user.getOrders().add(order);
-                userRepository.save(user);
-            }
-        }
-    }
 }

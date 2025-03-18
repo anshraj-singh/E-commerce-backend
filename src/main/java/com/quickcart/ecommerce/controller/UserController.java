@@ -104,4 +104,23 @@ public class UserController {
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+
+    @PutMapping("/update-profile")
+    public ResponseEntity<?> updateUserProfile(@RequestBody UserEntry updatedUser ) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        UserEntry userInDb = userService.findByUsername(username).orElse(null);
+
+        if (userInDb != null) {
+            if (updatedUser .getAddress() != null && !updatedUser .getAddress().isEmpty()) {
+                userInDb.setAddress(updatedUser .getAddress());
+            }
+            if (updatedUser .getPhoneNumber() != null && !updatedUser .getPhoneNumber().isEmpty()) {
+                userInDb.setPhoneNumber(updatedUser .getPhoneNumber());
+            }
+            userService.saveUser (userInDb);
+            return new ResponseEntity<>(userInDb, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
 }
