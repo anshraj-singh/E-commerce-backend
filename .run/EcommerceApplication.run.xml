@@ -1,0 +1,20 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="EcommerceApplication" type="Application" factoryName="Application" nameIsGenerated="true">
+    <option name="ALTERNATIVE_JRE_PATH" value="21" />
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+    <option name="envFilePaths">
+      <option value="$PROJECT_DIR$/src/.env" />
+    </option>
+    <option name="MAIN_CLASS_NAME" value="com.quickcart.ecommerce.EcommerceApplication" />
+    <module name="ecommerce" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="com.quickcart.ecommerce.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
