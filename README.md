@@ -309,3 +309,42 @@ The Wishlist feature allows users to create and manage a list of products they a
 5. **Security**: The wishlist endpoints are secured to ensure that only authenticated users can access them.
 
 This feature enhances the overall functionality of the e-commerce platform, providing users with a convenient way to manage their desired products.
+
+
+## 🏗️ Core Architecture Enhancements
+Today, we successfully integrated an **In-Memory Caching Layer** using Redis to optimize data retrieval and reduce database overhead.
+
+### 1. Redis Configuration (`RedisConfig.java`)
+We implemented a custom production-grade configuration to replace default Java serialization with **JSON Serialization**.
+* **RedisTemplate & Factory:** Configured to handle complex data types.
+* **Jackson2JsonRedisSerializer:** Ensures that cached data is human-readable and compatible across different microservices.
+* **TTL (Time-To-Live):** Set to **2 minutes** for testing.
+
+### 2. Cache-Aside Pattern Implementation
+The application now follows the **Lazy Loading (Cache-Aside)** strategy for Product APIs:
+* **Read Workflow:** 1. Check Redis for Product ID.
+    2. If **Cache Hit**: Return data immediately (~8ms).
+    3. If **Cache Miss**: Retrieve from MongoDB, populate Redis, and return to user.
+* **Write Workflow:** 1. Update MongoDB.
+    2. Trigger `@CacheEvict` to remove stale data from Redis, ensuring data consistency.
+
+## Product json example: 
+```
+localhost:8080/product/id/{id}
+```
+### response will get: 
+```
+{
+"id": "696269e05f31b10065bf108e",
+"name": "iphone",
+"description": "this is good phone",
+"price": 999.9,
+"stock": 5
+}
+```
+
+## 🛠️ How to Test
+1.  **Environment Setup:** Ensure `.env` contains `REDIS_HOST` and `REDIS_PORT`.
+2.  **Start Services:** Run `redis-server` in WSL.
+3.  **Monitor:** Run `redis-cli MONITOR` in your terminal to see real-time cache population.
+4.  **API Test:** Use Postman to hit `GET /product/id/{id}` twice. The second hit will bypass the database entirely.
