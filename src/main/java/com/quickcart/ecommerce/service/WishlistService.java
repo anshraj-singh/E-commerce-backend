@@ -4,6 +4,8 @@ import com.quickcart.ecommerce.entity.Product;
 import com.quickcart.ecommerce.entity.Wishlist;
 import com.quickcart.ecommerce.repository.WishlistRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -18,10 +20,12 @@ public class WishlistService {
         wishlistRepository.save(wishlist);
     }
 
+    @Cacheable(value = "wishlists", key = "#userId")
     public Optional<Wishlist> getWishlistByUserId(String userId) {
         return Optional.ofNullable(wishlistRepository.findByUserId(userId));
     }
 
+    @CacheEvict(value = "wishlists", key = "#userId")
     public void addProductToWishlist(String userId, Product product) {
         Wishlist wishlist = wishlistRepository.findByUserId(userId);
         if (wishlist == null) {
@@ -32,6 +36,7 @@ public class WishlistService {
         wishlistRepository.save(wishlist);
     }
 
+    @CacheEvict(value = "wishlists", key = "#userId")
     public void removeProductFromWishlist(String userId, String productId) {
         Wishlist wishlist = wishlistRepository.findByUserId(userId);
         if (wishlist != null) {
