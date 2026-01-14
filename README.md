@@ -348,3 +348,46 @@ localhost:8080/product/id/{id}
 2.  **Start Services:** Run `redis-server` in WSL.
 3.  **Monitor:** Run `redis-cli MONITOR` in your terminal to see real-time cache population.
 4.  **API Test:** Use Postman to hit `GET /product/id/{id}` twice. The second hit will bypass the database entirely.
+
+### 🛍️ API Documentation (Examples)
+- 1. Product API
+ ```
+   Endpoint: GET /product/id/{productId}
+```
+- Description: Fetches product details. First request hits MongoDB, subsequent requests hit Redis.
+```
+{
+"id": "69665b3800815c17e4c6e22a",
+"name": "Laptop",
+"description": "High-performance gaming laptop with 16GB RAM",
+"price": 75000.0,
+"stock": 10
+}
+```
+* Performance Impact: Latency dropped from 80ms (DB) to 7ms (Redis).
+
+- 2. Wishlist API
+```
+Endpoint: GET /wishlist/me
+```
+- Description: Fetches the authenticated user's wishlist from Redis cache.
+- Sample Response:
+```
+{
+"id": "wish_78234",
+"userId": "69623757392deb301d836ada",
+"products": [
+{
+"id": "69665b3800815c17e4c6e22a",
+"name": "Laptop",
+"price": 75000.0
+},
+{
+"id": "696269e05f31b10065bf108e",
+"name": "iPhone",
+"price": 999.9
+}
+]
+}
+```
+- Note: Any POST (Add) or DELETE (Remove) operation on the wishlist will automatically clear this cache to ensure data freshness.
