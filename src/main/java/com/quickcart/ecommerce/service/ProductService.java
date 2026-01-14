@@ -31,7 +31,7 @@ public class ProductService {
         return productRepository.findById(productId);
     }
 
-    @Cacheable(value = "allProducts")
+    @Cacheable(value = "allProducts", key = "'list'")
     public List<Product> getAllProducts() {
         log.info("### CACHE MISS: Fetching all products from MongoDB");
         return productRepository.findAll();
