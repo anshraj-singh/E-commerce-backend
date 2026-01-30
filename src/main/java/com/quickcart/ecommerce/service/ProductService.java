@@ -41,10 +41,10 @@ public class ProductService {
      * When saving/updating, we use @CacheEvict to remove the old data.
      * This ensures the "Next" get request fetches the fresh data from the DB.
      */
-    @CacheEvict(value = "products", key = "#product.id")
+    @CacheEvict(value = {"products", "allProducts"}, allEntries = true) // Clear allProducts cache too
     public void saveProduct(Product product) {
         productRepository.save(product);
-        log.info("### CACHE EVICTED: Product {} updated, cache cleared", product.getId());
+        log.info("### CACHE EVICTED: Product and List cleared");
     }
 
     @CacheEvict(value = "products", key = "#productId")

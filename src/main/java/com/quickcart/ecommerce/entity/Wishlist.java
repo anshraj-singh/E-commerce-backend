@@ -4,17 +4,19 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
-
+import java.io.Serializable; // Added
 import java.util.ArrayList;
 import java.util.List;
 
 @Document(collection = "wishlists")
 @Data
-public class Wishlist {
+public class Wishlist implements Serializable { // Implement this
+    private static final long serialVersionUID = 1L; // Add this ID
+
     @Id
-    private String id; // Wishlist ID
-    private String userId; // ID of the user who owns the wishlist
+    private String id;
+    private String userId;
 
     @DBRef
-    private List<Product> products = new ArrayList<>(); // List of products in the wishlist
+    private List<Product> products = new ArrayList<>();
 }

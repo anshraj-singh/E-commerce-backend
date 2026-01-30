@@ -40,7 +40,7 @@ public class RedisConfig {
                 // Wishlists stay for 24 hours because users don't change them every minute
                 .withCacheConfiguration("wishlists",
                         RedisCacheConfiguration.defaultCacheConfig()
-                                .entryTtl(Duration.ofHours(24))
+                                .entryTtl(Duration.ofHours(1))
                                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer())))
                 // Products stay for 1 hour to keep prices/stock relatively fresh
                 .withCacheConfiguration("products",
