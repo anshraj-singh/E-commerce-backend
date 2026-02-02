@@ -31,10 +31,9 @@ public class CartService {
         return Optional.ofNullable(cartRepository.findByUserId(userId));
     }
 
-    // Add product to user's cart
+    // Add product to user's cart (WITHOUT deducting stock)
     public Cart addProductToCart(String userId, Product product, int quantity) {
         Cart cart = cartRepository.findByUserId(userId);
-
         if (cart == null) {
             cart = new Cart();
             cart.setUserId(userId);
@@ -56,15 +55,12 @@ public class CartService {
         cart.getItems().add(newItem);
         updateTotalPrice(cart);
 
-        // Decrement the stock of the product
-        product.setStock(product.getStock() - quantity);
-        // Save the updated product
-        productService.saveProduct(product);
+        // REMOVED: Stock deduction happens here (WRONG!)
+        // Stock will be deducted only when payment is completed
 
         // Save the cart and update the user's cart list
         Cart savedCart = cartRepository.save(cart);
-        updateUserCart(userId, savedCart); // Update user's cart list
-
+        updateUserCart(userId, savedCart);
         return savedCart;
     }
 
@@ -72,6 +68,8 @@ public class CartService {
     private void updateUserCart(String userId, Cart cart) {
         UserEntry user = userRepository.findById(userId).orElse(null);
         if (user != null) {
+            // Remove old cart references and add new one
+            user.getCarts().removeIf(c -> c.getId().equals(cart.getId()));
             user.getCarts().add(cart);
             userRepository.save(user);
         }

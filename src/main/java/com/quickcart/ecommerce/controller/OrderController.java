@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -58,7 +59,7 @@ public class OrderController {
         }
 
         try {
-            // Create order first
+            // Create order first (stock will be deducted AFTER payment)
             Order order = orderService.placeOrderFromCart(user.getId());
             double totalAmount = order.getTotalAmount();
 
@@ -111,17 +112,23 @@ public class OrderController {
                 return new ResponseEntity<>("Not enough stock available!", HttpStatus.BAD_REQUEST);
             }
 
-            // Create order
+            // Create order with OrderItem (stock will be deducted AFTER payment)
             Order order = new Order();
             order.setUserId(user.getId());
             order.setStatus("Pending");
-            order.setOrderProducts(List.of(product));
+            order.setOrderItems(new ArrayList<>());
+
+            // Create OrderItem with quantity
+            OrderItem orderItem = new OrderItem();
+            orderItem.setProduct(product);
+            orderItem.setQuantity(quantity);
+            orderItem.setPriceAtOrder(product.getPrice());
+
+            order.getOrderItems().add(orderItem);
             order.setTotalAmount(product.getPrice() * quantity);
             orderService.saveOrder(order);
 
-            // Update stock
-            product.setStock(product.getStock() - quantity);
-            productService.saveProduct(product);
+            // DO NOT update stock here - it will be updated after payment
 
             // Convert INR to USD
             double conversionRate = 87.50;
