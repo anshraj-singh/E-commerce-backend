@@ -58,30 +58,31 @@ public class OrderController {
         }
 
         try {
+            // Create order first
             Order order = orderService.placeOrderFromCart(user.getId());
-            double totalAmount = order.getTotalAmount(); // Get the total amount from the order
+            double totalAmount = order.getTotalAmount();
 
-            // Assuming totalAmount is in INR
-            double conversionRate = 87.50; // Example conversion rate: 1 USD = 87.50 INR
-            double amountInUSD = totalAmount / conversionRate; // Convert INR to USD
+            // Convert INR to USD
+            double conversionRate = 87.50;
+            double amountInUSD = totalAmount / conversionRate;
 
-            // Create a ProductRequest object to pass to the PaymentService
+            // Create a ProductRequest object
             ProductRequest productRequest = new ProductRequest();
-            productRequest.setName("Order for " + order.getId());
+            productRequest.setName("Order #" + order.getId());
             productRequest.setAmount((long) (amountInUSD * 100)); // Amount in cents
             productRequest.setCurrency("usd");
-            productRequest.setQuantity(1L); // Assuming one item for simplicity
+            productRequest.setQuantity(1L);
 
-            // Call the payment service to create a payment session
-            StripeResponse stripeResponse = paymentService.checkoutProducts(productRequest);
+            // Create payment session with orderId in metadata
+            StripeResponse stripeResponse = paymentService.checkoutProducts(productRequest, order.getId());
 
             if ("SUCCESS".equals(stripeResponse.getStatus())) {
-                return new ResponseEntity<>(stripeResponse.getSessionUrl(), HttpStatus.CREATED); // Return the payment link
+                return new ResponseEntity<>(stripeResponse.getSessionUrl(), HttpStatus.CREATED);
             } else {
                 return new ResponseEntity<>(stripeResponse.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } catch (Exception e) {
-            return new ResponseEntity<>("Order placement failed!", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Order placement failed: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -97,7 +98,7 @@ public class OrderController {
         }
 
         try {
-            // Get the product from the product service
+            // Get the product
             Optional<Product> productOpt = productService.getById(productId);
             if (productOpt.isEmpty()) {
                 return new ResponseEntity<>("Product not found!", HttpStatus.NOT_FOUND);
@@ -105,41 +106,49 @@ public class OrderController {
 
             Product product = productOpt.get();
 
-            // Check if the requested quantity is available in stock
+            // Check stock
             if (quantity > product.getStock()) {
                 return new ResponseEntity<>("Not enough stock available!", HttpStatus.BAD_REQUEST);
             }
 
-            // Create a new order for the single product
+            // Create order
             Order order = new Order();
             order.setUserId(user.getId());
             order.setStatus("Pending");
-            order.setOrderProducts(List.of(product)); // Add the single product
-            order.setTotalAmount(product.getPrice() * quantity); // Set the total amount based on quantity
+            order.setOrderProducts(List.of(product));
+            order.setTotalAmount(product.getPrice() * quantity);
+            orderService.saveOrder(order);
 
-            orderService.saveOrder(order); // Save the order
-
-            // Update the product stock
+            // Update stock
             product.setStock(product.getStock() - quantity);
-            productService.saveProduct(product); // Save the updated product
+            productService.saveProduct(product);
 
-            // Clear the cart if needed
-            Cart cart = cartService.getCartByUserId(user.getId()).orElse(null);
-            if (cart != null) {
-                cart.getItems().clear(); // Clear the cart items
-                cart.setTotalPrice(0.0); // Reset total price
-                cartService.saveCart(cart); // Save the updated cart
+            // Convert INR to USD
+            double conversionRate = 87.50;
+            double amountInUSD = order.getTotalAmount() / conversionRate;
+
+            // Create payment request
+            ProductRequest productRequest = new ProductRequest();
+            productRequest.setName("Order #" + order.getId() + " - " + product.getName());
+            productRequest.setAmount((long) (amountInUSD * 100));
+            productRequest.setCurrency("usd");
+            productRequest.setQuantity((long) quantity);
+
+            // Create payment session with orderId
+            StripeResponse stripeResponse = paymentService.checkoutProducts(productRequest, order.getId());
+
+            if ("SUCCESS".equals(stripeResponse.getStatus())) {
+                return new ResponseEntity<>(stripeResponse.getSessionUrl(), HttpStatus.CREATED);
+            } else {
+                return new ResponseEntity<>(stripeResponse.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
             }
-
-            return new ResponseEntity<>(order, HttpStatus.CREATED);
         } catch (Exception e) {
-            return new ResponseEntity<>("Order placement failed!", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Order placement failed: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
-
     @GetMapping("/id/{orderId}")
-    public ResponseEntity<?> getOrderById(@PathVariable String orderId) {
+    public ResponseEntity<Order> getOrderById(@PathVariable String orderId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         UserEntry user = userService.findByUsername(username).orElse(null);

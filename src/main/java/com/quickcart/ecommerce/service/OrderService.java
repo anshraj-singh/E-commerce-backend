@@ -34,7 +34,7 @@ public class OrderService {
     public Order placeOrderFromCart(String userId) {
         UserEntry user = userRepository.findById(userId).orElse(null);
         if (user == null) {
-            throw new RuntimeException("User  not found!");
+            throw new RuntimeException("User not found!");
         }
 
         Cart cart = cartService.getCartByUserId(userId).orElse(null);
@@ -44,14 +44,13 @@ public class OrderService {
 
         Order order = new Order();
         order.setUserId(userId);
-        order.setStatus("Pending");
-        order.setOrderProducts(new ArrayList<>()); // Initialize the order products
+        order.setStatus("Pending"); // Initial status
+        order.setOrderProducts(new ArrayList<>());
 
         double totalAmount = 0.0;
-
         for (CartItem item : cart.getItems()) {
-            order.getOrderProducts().add(item.getProduct()); // Add product to order
-            totalAmount += item.getProduct().getPrice() * item.getQuantity(); // Calculate total amount
+            order.getOrderProducts().add(item.getProduct());
+            totalAmount += item.getProduct().getPrice() * item.getQuantity();
         }
 
         order.setTotalAmount(totalAmount);

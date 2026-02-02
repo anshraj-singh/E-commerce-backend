@@ -30,22 +30,23 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .csrf().disable()
                 .authorizeRequests()
+                .antMatchers("/webhook/**").permitAll() // Allow webhook endpoint without authentication
                 .antMatchers("/admin/**").hasRole("ADMIN") // Only ROLE_ADMIN can access /admin/*
-                .antMatchers("/user/me","/update-user").authenticated() // Require authentication for accessing user info
-                .antMatchers("/cart/**","/order/**","/wishlist/**").authenticated()
+                .antMatchers("/user/me", "/update-user").authenticated() // Require authentication
+                .antMatchers("/cart/**", "/order/**", "/wishlist/**").authenticated()
                 .anyRequest().permitAll();
+
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS); // For REST APIs
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
     }
 
-
     @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {  //! hare is work on user and password related authenticate
-        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder()); //! to match database pass and login password
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder(){ //! take password then change hash form create password
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 

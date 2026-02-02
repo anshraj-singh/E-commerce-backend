@@ -20,10 +20,10 @@ public class PaymentService {
     private String secretKey;
 
     @Autowired
-    private UserService userService; // Inject UserService to get customer details
+    private UserService userService;
 
-    public StripeResponse checkoutProducts(ProductRequest productRequest) {
-        // Set your secret key. Remember to switch to your live secret key in production!
+    public StripeResponse checkoutProducts(ProductRequest productRequest, String orderId) {
+        // Set your secret key
         Stripe.apiKey = secretKey;
 
         // Get the currently authenticated user
@@ -34,7 +34,7 @@ public class PaymentService {
         if (user == null) {
             return StripeResponse.builder()
                     .status("ERROR")
-                    .message("User  not found")
+                    .message("User not found")
                     .build();
         }
 
@@ -59,13 +59,15 @@ public class PaymentService {
                         .setPriceData(priceData)
                         .build();
 
-        // Create session parameters
+        // Create session parameters with metadata for order tracking
         SessionCreateParams params =
                 SessionCreateParams.builder()
                         .setMode(SessionCreateParams.Mode.PAYMENT)
-                        .setSuccessUrl("http://localhost:8080/success")
+                        .setSuccessUrl("http://localhost:8080/success?session_id={CHECKOUT_SESSION_ID}")
                         .setCancelUrl("http://localhost:8080/cancel")
                         .addLineItem(lineItem)
+                        .putMetadata("orderId", orderId) // Store orderId in metadata
+                        .putMetadata("userId", user.getId()) // Store userId in metadata
                         .build();
 
         // Create session
