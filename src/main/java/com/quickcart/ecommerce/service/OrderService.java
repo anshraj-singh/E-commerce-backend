@@ -79,4 +79,24 @@ public class OrderService {
     public void deleteById(String orderId) {
         orderRepository.deleteById(orderId);
     }
+
+    // New method to update order status after successful payment
+    public void updateOrderStatusToPaid(String orderId) {
+        Optional<Order> orderOpt = orderRepository.findById(orderId);
+        if (orderOpt.isPresent()) {
+            Order order = orderOpt.get();
+            order.setStatus("Paid");
+            orderRepository.save(order);
+        }
+    }
+
+    // Method to update order status to any status
+    public void updateOrderStatus(String orderId, String status) {
+        Optional<Order> orderOpt = orderRepository.findById(orderId);
+        if (orderOpt.isPresent()) {
+            Order order = orderOpt.get();
+            order.setStatus(status);
+            orderRepository.save(order);
+        }
+    }
 }
