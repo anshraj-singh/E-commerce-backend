@@ -33,30 +33,6 @@ public class AdminController {
                     "Requires JWT token with ADMIN privileges.",
             tags = {"Admin - User Management"}
     )
-    @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "200",
-                    description = "Users retrieved successfully",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = UserEntry.class, type = "array")
-                    )
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized - Invalid or missing JWT token",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "403",
-                    description = "Forbidden - User does not have ADMIN role",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "404",
-                    description = "No users found"
-            )
-    })
     @GetMapping("/getAllUsers")
     public ResponseEntity<List<UserEntry>> getAllUsers() {
         List<UserEntry> all = userService.getAllUser();
@@ -72,22 +48,6 @@ public class AdminController {
                     "This action cannot be undone. Requires JWT token with ADMIN privileges.",
             tags = {"Admin - User Management"}
     )
-    @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "204",
-                    description = "User deleted successfully"
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized - Invalid or missing JWT token",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "403",
-                    description = "Forbidden - User does not have ADMIN role",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            )
-    })
     @DeleteMapping("/id/{myId}")
     public ResponseEntity<?> deleteUserById(
             @Parameter(description = "User ID to delete", required = true, example = "65abc123def456789012")
@@ -102,31 +62,6 @@ public class AdminController {
                     "Admin users have access to all admin endpoints. Requires JWT token with ADMIN privileges.",
             tags = {"Admin - User Management"}
     )
-    @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "201",
-                    description = "Admin user created successfully",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = UserEntry.class)
-                    )
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "400",
-                    description = "Invalid user data or username already exists",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized - Invalid or missing JWT token",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "403",
-                    description = "Forbidden - User does not have ADMIN role",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            )
-    })
     @PostMapping("/create-admin-user")
     public ResponseEntity<?> createUser(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
