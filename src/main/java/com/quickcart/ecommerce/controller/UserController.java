@@ -52,32 +52,6 @@ public class UserController {
                     "User will receive a confirmation email after successful registration.",
             tags = {"Authentication & User Management"}
     )
-    @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "201",
-                    description = "User registered successfully",
-                    content = @Content(
-                            mediaType = "application/json",
-                            examples = @ExampleObject(value = "\"User registered successfully\"")
-                    )
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "400",
-                    description = "Invalid user data or user already exists",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = ErrorResponse.class)
-                    )
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "500",
-                    description = "Internal server error",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = ErrorResponse.class)
-                    )
-            )
-    })
     @PostMapping("/signup")
     public ResponseEntity<String> signup(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -116,32 +90,6 @@ public class UserController {
                     "Use the returned JWT token for accessing protected endpoints.",
             tags = {"Authentication & User Management"}
     )
-    @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "200",
-                    description = "Login successful - JWT token returned",
-                    content = @Content(
-                            mediaType = "application/json",
-                            examples = @ExampleObject(
-                                    name = "JWT Token",
-                                    value = "\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\""
-                            )
-                    )
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "400",
-                    description = "Invalid credentials",
-                    content = @Content(
-                            mediaType = "application/json",
-                            examples = @ExampleObject(value = "\"Incorrect username or password\"")
-                    )
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "500",
-                    description = "Internal server error",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            )
-    })
     @PostMapping("/login")
     public ResponseEntity<String> login(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -177,26 +125,6 @@ public class UserController {
             security = @SecurityRequirement(name = "Bearer Authentication"),
             tags = {"Authentication & User Management"}
     )
-    @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "200",
-                    description = "User profile retrieved successfully",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = UserEntry.class)
-                    )
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized - Invalid or missing JWT token",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "404",
-                    description = "User not found",
-                    content = @Content(examples = @ExampleObject(value = "\"User not found\""))
-            )
-    })
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -214,21 +142,6 @@ public class UserController {
             security = @SecurityRequirement(name = "Bearer Authentication"),
             tags = {"Authentication & User Management"}
     )
-    @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "200",
-                    description = "User credentials updated successfully"
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized - Invalid or missing JWT token",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "404",
-                    description = "User not found"
-            )
-    })
     @PutMapping("/update-user")
     public ResponseEntity<?> updateUser(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -270,22 +183,6 @@ public class UserController {
             security = @SecurityRequirement(name = "Bearer Authentication"),
             tags = {"Authentication & User Management"}
     )
-    @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "200",
-                    description = "Profile updated successfully",
-                    content = @Content(schema = @Schema(implementation = UserEntry.class))
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "404",
-                    description = "User not found"
-            )
-    })
     @PutMapping("/update-profile")
     public ResponseEntity<?> updateUserProfile(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
