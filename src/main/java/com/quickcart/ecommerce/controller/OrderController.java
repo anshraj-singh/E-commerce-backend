@@ -1,7 +1,16 @@
 package com.quickcart.ecommerce.controller;
 
+import com.quickcart.ecommerce.dto.ErrorResponse;
 import com.quickcart.ecommerce.entity.*;
 import com.quickcart.ecommerce.service.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +24,8 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/order")
+@Tag(name = "Orders", description = "APIs for order management and checkout. Requires authentication (USER role).")
+@SecurityRequirement(name = "Bearer Authentication")
 public class OrderController {
 
     @Autowired
@@ -32,7 +43,31 @@ public class OrderController {
     @Autowired
     private PaymentService paymentService;
 
-    // Get all orders for the authenticated user
+    @Operation(
+            summary = "Get user's orders",
+            description = "Retrieve all orders placed by the currently authenticated user. " +
+                    "Returns order history with status, items, and amounts. Requires JWT authentication.",
+            tags = {"Orders"}
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "Orders retrieved successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = Order.class, type = "array")
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - Invalid or missing JWT token",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "404",
+                    description = "User not found"
+            )
+    })
     @GetMapping("/me")
     public ResponseEntity<List<Order>> getAllOrders() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -47,7 +82,48 @@ public class OrderController {
         return new ResponseEntity<>(allOrders, HttpStatus.OK);
     }
 
-    // Place an order from the user's cart
+    @Operation(
+            summary = "Place order from cart",
+            description = "Create order from user's cart and initiate Stripe payment. " +
+                    "Order is created with 'Pending' status. Stock is validated but NOT deducted. " +
+                    "Returns Stripe checkout URL for payment. After successful payment, " +
+                    "order status updates to 'Paid' and stock is deducted via webhook. " +
+                    "Cart is cleared after order creation. Requires JWT authentication.",
+            tags = {"Orders"}
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "201",
+                    description = "Order created - Stripe payment URL returned",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = "\"https://checkout.stripe.com/pay/cs_test_...\""
+                            )
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "400",
+                    description = "Cart is empty or insufficient stock",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(value = "\"Order placement failed: Cart is empty!\"")
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - Invalid or missing JWT token",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "404",
+                    description = "User not found"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "500",
+                    description = "Payment session creation failed"
+            )
+    })
     @PostMapping("/placeOrder")
     public ResponseEntity<?> placeOrder() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -59,22 +135,18 @@ public class OrderController {
         }
 
         try {
-            // Create order first (stock will be deducted AFTER payment)
             Order order = orderService.placeOrderFromCart(user.getId());
             double totalAmount = order.getTotalAmount();
 
-            // Convert INR to USD
             double conversionRate = 87.50;
             double amountInUSD = totalAmount / conversionRate;
 
-            // Create a ProductRequest object
             ProductRequest productRequest = new ProductRequest();
             productRequest.setName("Order #" + order.getId());
-            productRequest.setAmount((long) (amountInUSD * 100)); // Amount in cents
+            productRequest.setAmount((long) (amountInUSD * 100));
             productRequest.setCurrency("usd");
             productRequest.setQuantity(1L);
 
-            // Create payment session with orderId in metadata
             StripeResponse stripeResponse = paymentService.checkoutProducts(productRequest, order.getId());
 
             if ("SUCCESS".equals(stripeResponse.getStatus())) {
@@ -87,9 +159,49 @@ public class OrderController {
         }
     }
 
-    // User can place a single order for a product
+    @Operation(
+            summary = "Place single product order",
+            description = "Create order for a single product with specified quantity and initiate payment. " +
+                    "Useful for 'Buy Now' functionality. Order created with 'Pending' status. " +
+                    "Stock validated but NOT deducted until payment completion. " +
+                    "Returns Stripe checkout URL. Requires JWT authentication.",
+            tags = {"Orders"}
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "201",
+                    description = "Order created - Stripe payment URL returned",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = "\"https://checkout.stripe.com/pay/cs_test_...\""
+                            )
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "400",
+                    description = "Insufficient stock",
+                    content = @Content(
+                            examples = @ExampleObject(value = "\"Not enough stock available!\"")
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "404",
+                    description = "Product not found or user not found"
+            )
+    })
     @PostMapping("/placeSingleOrder/{productId}/{quantity}")
-    public ResponseEntity<?> placeSingleOrder(@PathVariable String productId, @PathVariable int quantity) {
+    public ResponseEntity<?> placeSingleOrder(
+            @Parameter(description = "Product ID to order", required = true, example = "65abc123def456789012")
+            @PathVariable String productId,
+            @Parameter(description = "Quantity to order", required = true, example = "1")
+            @PathVariable int quantity) {
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         UserEntry user = userService.findByUsername(username).orElse(null);
@@ -99,7 +211,6 @@ public class OrderController {
         }
 
         try {
-            // Get the product
             Optional<Product> productOpt = productService.getById(productId);
             if (productOpt.isEmpty()) {
                 return new ResponseEntity<>("Product not found!", HttpStatus.NOT_FOUND);
@@ -107,18 +218,15 @@ public class OrderController {
 
             Product product = productOpt.get();
 
-            // Check stock
             if (quantity > product.getStock()) {
                 return new ResponseEntity<>("Not enough stock available!", HttpStatus.BAD_REQUEST);
             }
 
-            // Create order with OrderItem (stock will be deducted AFTER payment)
             Order order = new Order();
             order.setUserId(user.getId());
             order.setStatus("Pending");
             order.setOrderItems(new ArrayList<>());
 
-            // Create OrderItem with quantity
             OrderItem orderItem = new OrderItem();
             orderItem.setProduct(product);
             orderItem.setQuantity(quantity);
@@ -128,20 +236,15 @@ public class OrderController {
             order.setTotalAmount(product.getPrice() * quantity);
             orderService.saveOrder(order);
 
-            // DO NOT update stock here - it will be updated after payment
-
-            // Convert INR to USD
             double conversionRate = 87.50;
             double amountInUSD = order.getTotalAmount() / conversionRate;
 
-            // Create payment request
             ProductRequest productRequest = new ProductRequest();
             productRequest.setName("Order #" + order.getId() + " - " + product.getName());
             productRequest.setAmount((long) (amountInUSD * 100));
             productRequest.setCurrency("usd");
             productRequest.setQuantity((long) quantity);
 
-            // Create payment session with orderId
             StripeResponse stripeResponse = paymentService.checkoutProducts(productRequest, order.getId());
 
             if ("SUCCESS".equals(stripeResponse.getStatus())) {
@@ -154,8 +257,33 @@ public class OrderController {
         }
     }
 
+    @Operation(
+            summary = "Get order by ID",
+            description = "Retrieve details of a specific order. User can only access their own orders. " +
+                    "Requires JWT authentication.",
+            tags = {"Orders"}
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "Order found",
+                    content = @Content(schema = @Schema(implementation = Order.class))
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "404",
+                    description = "Order not found or doesn't belong to user"
+            )
+    })
     @GetMapping("/id/{orderId}")
-    public ResponseEntity<Order> getOrderById(@PathVariable String orderId) {
+    public ResponseEntity<Order> getOrderById(
+            @Parameter(description = "Order ID", required = true, example = "65def789ghi012345678")
+            @PathVariable String orderId) {
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         UserEntry user = userService.findByUsername(username).orElse(null);
@@ -171,8 +299,32 @@ public class OrderController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+    @Operation(
+            summary = "Delete order",
+            description = "Cancel/delete an order. User can only delete their own orders. " +
+                    "Note: Cannot delete orders with 'Paid' status. Requires JWT authentication.",
+            tags = {"Orders"}
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "204",
+                    description = "Order deleted successfully"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "404",
+                    description = "Order not found or doesn't belong to user"
+            )
+    })
     @DeleteMapping("/id/{orderId}")
-    public ResponseEntity<?> deleteOrderById(@PathVariable String orderId) {
+    public ResponseEntity<?> deleteOrderById(
+            @Parameter(description = "Order ID to delete", required = true, example = "65def789ghi012345678")
+            @PathVariable String orderId) {
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         UserEntry user = userService.findByUsername(username).orElse(null);

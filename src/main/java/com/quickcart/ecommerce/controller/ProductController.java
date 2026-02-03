@@ -1,7 +1,15 @@
 package com.quickcart.ecommerce.controller;
 
+import com.quickcart.ecommerce.dto.ErrorResponse;
 import com.quickcart.ecommerce.entity.Product;
 import com.quickcart.ecommerce.service.ProductService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,11 +20,37 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/product")
+@Tag(name = "Products", description = "Public APIs for browsing products. No authentication required.")
 public class ProductController {
 
     @Autowired
     private ProductService productService;
 
+    @Operation(
+            summary = "Get all products",
+            description = "Retrieve list of all available products. This is a public endpoint - no authentication required. " +
+                    "Products are cached in Redis for better performance.",
+            tags = {"Products"}
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "Products retrieved successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = Product.class, type = "array")
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "404",
+                    description = "No products found"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "500",
+                    description = "Internal server error",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            )
+    })
     @GetMapping("/getAllProducts")
     public ResponseEntity<List<Product>> getAllProducts() {
         List<Product> allProducts = productService.getAllProducts();
@@ -26,8 +60,35 @@ public class ProductController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+    @Operation(
+            summary = "Get product by ID",
+            description = "Retrieve detailed information about a specific product. This is a public endpoint. " +
+                    "Product data is cached in Redis with 1-hour TTL.",
+            tags = {"Products"}
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "Product found",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = Product.class)
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "404",
+                    description = "Product not found"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "500",
+                    description = "Internal server error",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            )
+    })
     @GetMapping("/id/{productId}")
-    public ResponseEntity<Product> getProductById(@PathVariable String productId) {
+    public ResponseEntity<Product> getProductById(
+            @Parameter(description = "Product ID (MongoDB ObjectId)", required = true, example = "65abc123def456789012")
+            @PathVariable String productId) {
         Optional<Product> product = productService.getById(productId);
         if (product.isPresent()) {
             return new ResponseEntity<>(product.get(), HttpStatus.OK);

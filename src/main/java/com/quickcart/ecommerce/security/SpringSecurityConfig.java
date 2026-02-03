@@ -30,6 +30,14 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .csrf().disable()
                 .authorizeRequests()
+                .antMatchers(
+                        "/swagger-ui/**",
+                        "/swagger-ui.html",
+                        "/v3/api-docs/**",
+                        "/v3/api-docs.yaml",
+                        "/swagger-resources/**",
+                        "/webjars/**"
+                ).permitAll()
                 .antMatchers("/webhook/**").permitAll() // Allow webhook endpoint without authentication
                 .antMatchers("/admin/**").hasRole("ADMIN") // Only ROLE_ADMIN can access /admin/*
                 .antMatchers("/user/me", "/update-user").authenticated() // Require authentication
