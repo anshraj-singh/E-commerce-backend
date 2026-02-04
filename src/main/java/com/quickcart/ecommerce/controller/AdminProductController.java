@@ -34,30 +34,6 @@ public class AdminProductController {
                     "Restricted to ADMIN role. Requires JWT token with ADMIN privileges.",
             tags = {"Admin - Product Management"}
     )
-    @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "200",
-                    description = "Products retrieved successfully",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = Product.class, type = "array")
-                    )
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized - Invalid or missing JWT token",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "403",
-                    description = "Forbidden - User does not have ADMIN role",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "404",
-                    description = "No products found"
-            )
-    })
     @GetMapping("/getAllProducts")
     public ResponseEntity<List<Product>> getAllProducts() {
         List<Product> allProducts = productService.getAllProducts();
@@ -73,31 +49,6 @@ public class AdminProductController {
                     "Restricted to ADMIN role. Requires JWT token with ADMIN privileges.",
             tags = {"Admin - Product Management"}
     )
-    @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "201",
-                    description = "Product created successfully",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = Product.class)
-                    )
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "400",
-                    description = "Invalid product data",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized - Invalid or missing JWT token",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "403",
-                    description = "Forbidden - User does not have ADMIN role",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            )
-    })
     @PostMapping("/createProduct")
     public ResponseEntity<?> createProduct(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -131,30 +82,6 @@ public class AdminProductController {
                     "Restricted to ADMIN role. Requires JWT token with ADMIN privileges.",
             tags = {"Admin - Product Management"}
     )
-    @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "200",
-                    description = "Product found",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = Product.class)
-                    )
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "403",
-                    description = "Forbidden - User does not have ADMIN role",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "404",
-                    description = "Product not found"
-            )
-    })
     @GetMapping("/id/{productId}")
     public ResponseEntity<Product> getProductById(
             @Parameter(description = "Product ID", required = true, example = "65abc123def456789012")
@@ -172,35 +99,6 @@ public class AdminProductController {
                     "Restricted to ADMIN role. Requires JWT token with ADMIN privileges.",
             tags = {"Admin - Product Management"}
     )
-    @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "200",
-                    description = "Product updated successfully",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = Product.class)
-                    )
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "400",
-                    description = "Invalid product data",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "403",
-                    description = "Forbidden - User does not have ADMIN role",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "404",
-                    description = "Product not found"
-            )
-    })
     @PutMapping("/id/{productId}")
     public ResponseEntity<?> updateProductById(
             @Parameter(description = "Product ID to update", required = true, example = "65abc123def456789012")
@@ -240,22 +138,6 @@ public class AdminProductController {
                     "This action cannot be undone. Restricted to ADMIN role. Requires JWT token with ADMIN privileges.",
             tags = {"Admin - Product Management"}
     )
-    @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "204",
-                    description = "Product deleted successfully"
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "403",
-                    description = "Forbidden - User does not have ADMIN role",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            )
-    })
     @DeleteMapping("/id/{productId}")
     public ResponseEntity<?> deleteProductById(
             @Parameter(description = "Product ID to delete", required = true, example = "65abc123def456789012")

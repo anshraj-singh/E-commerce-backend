@@ -49,25 +49,6 @@ public class OrderController {
                     "Returns order history with status, items, and amounts. Requires JWT authentication.",
             tags = {"Orders"}
     )
-    @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "200",
-                    description = "Orders retrieved successfully",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = Order.class, type = "array")
-                    )
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized - Invalid or missing JWT token",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "404",
-                    description = "User not found"
-            )
-    })
     @GetMapping("/me")
     public ResponseEntity<List<Order>> getAllOrders() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -91,39 +72,6 @@ public class OrderController {
                     "Cart is cleared after order creation. Requires JWT authentication.",
             tags = {"Orders"}
     )
-    @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "201",
-                    description = "Order created - Stripe payment URL returned",
-                    content = @Content(
-                            mediaType = "application/json",
-                            examples = @ExampleObject(
-                                    value = "\"https://checkout.stripe.com/pay/cs_test_...\""
-                            )
-                    )
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "400",
-                    description = "Cart is empty or insufficient stock",
-                    content = @Content(
-                            mediaType = "application/json",
-                            examples = @ExampleObject(value = "\"Order placement failed: Cart is empty!\"")
-                    )
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized - Invalid or missing JWT token",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "404",
-                    description = "User not found"
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "500",
-                    description = "Payment session creation failed"
-            )
-    })
     @PostMapping("/placeOrder")
     public ResponseEntity<?> placeOrder() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -167,34 +115,6 @@ public class OrderController {
                     "Returns Stripe checkout URL. Requires JWT authentication.",
             tags = {"Orders"}
     )
-    @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "201",
-                    description = "Order created - Stripe payment URL returned",
-                    content = @Content(
-                            mediaType = "application/json",
-                            examples = @ExampleObject(
-                                    value = "\"https://checkout.stripe.com/pay/cs_test_...\""
-                            )
-                    )
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "400",
-                    description = "Insufficient stock",
-                    content = @Content(
-                            examples = @ExampleObject(value = "\"Not enough stock available!\"")
-                    )
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "404",
-                    description = "Product not found or user not found"
-            )
-    })
     @PostMapping("/placeSingleOrder/{productId}/{quantity}")
     public ResponseEntity<?> placeSingleOrder(
             @Parameter(description = "Product ID to order", required = true, example = "65abc123def456789012")
@@ -263,22 +183,6 @@ public class OrderController {
                     "Requires JWT authentication.",
             tags = {"Orders"}
     )
-    @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "200",
-                    description = "Order found",
-                    content = @Content(schema = @Schema(implementation = Order.class))
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "404",
-                    description = "Order not found or doesn't belong to user"
-            )
-    })
     @GetMapping("/id/{orderId}")
     public ResponseEntity<Order> getOrderById(
             @Parameter(description = "Order ID", required = true, example = "65def789ghi012345678")
@@ -305,21 +209,6 @@ public class OrderController {
                     "Note: Cannot delete orders with 'Paid' status. Requires JWT authentication.",
             tags = {"Orders"}
     )
-    @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "204",
-                    description = "Order deleted successfully"
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "404",
-                    description = "Order not found or doesn't belong to user"
-            )
-    })
     @DeleteMapping("/id/{orderId}")
     public ResponseEntity<?> deleteOrderById(
             @Parameter(description = "Order ID to delete", required = true, example = "65def789ghi012345678")

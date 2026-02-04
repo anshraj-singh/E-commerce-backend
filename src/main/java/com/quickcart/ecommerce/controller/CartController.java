@@ -44,25 +44,6 @@ public class CartController {
                     "Returns cart with all items, quantities, and total price. Requires JWT authentication.",
             tags = {"Shopping Cart"}
     )
-    @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "200",
-                    description = "Cart retrieved successfully",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = Cart.class)
-                    )
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized - Invalid or missing JWT token",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "404",
-                    description = "Cart not found or user not found"
-            )
-    })
     @GetMapping("/me")
     public ResponseEntity<Cart> getCartByUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -83,30 +64,6 @@ public class CartController {
                     "Requires JWT authentication.",
             tags = {"Shopping Cart"}
     )
-    @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "200",
-                    description = "Product added to cart successfully",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = Cart.class)
-                    )
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "400",
-                    description = "Insufficient stock or invalid quantity",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized - Invalid or missing JWT token",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "404",
-                    description = "Product not found or user not found"
-            )
-    })
     @PostMapping("/addItem/{productId}/{quantity}")
     public ResponseEntity<?> addItemToCart(
             @Parameter(description = "Product ID to add", required = true, example = "65abc123def456789012")
@@ -142,21 +99,6 @@ public class CartController {
                     "Requires JWT authentication.",
             tags = {"Shopping Cart"}
     )
-    @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "204",
-                    description = "Product removed from cart successfully"
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized - Invalid or missing JWT token",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "404",
-                    description = "User not found"
-            )
-    })
     @DeleteMapping("/removeItem/{productId}")
     public ResponseEntity<?> removeItemFromCart(
             @Parameter(description = "Product ID to remove", required = true, example = "65abc123def456789012")

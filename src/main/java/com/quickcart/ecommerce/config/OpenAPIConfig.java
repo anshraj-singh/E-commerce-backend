@@ -33,8 +33,7 @@ public class OpenAPIConfig {
                         "order processing, Stripe payment integration, and Redis caching.")
                 .version("1.0.0")
                 .contact(new Contact()
-                        .name("Your Name")
-                        .email("r14425817@gmail.com")
+                        .name("Ansh Raj Singh")
                         .url("https://github.com/anshraj-singh/E-commerce-backend"));
     }
 

@@ -45,25 +45,6 @@ public class WishlistController {
                     "Requires JWT authentication.",
             tags = {"Wishlist"}
     )
-    @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "200",
-                    description = "Wishlist retrieved successfully",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = Wishlist.class)
-                    )
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized - Invalid or missing JWT token",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "404",
-                    description = "Wishlist not found or user not found"
-            )
-    })
     @GetMapping("/me")
     public ResponseEntity<Wishlist> getWishlistByUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -83,21 +64,6 @@ public class WishlistController {
                     "Requires JWT authentication.",
             tags = {"Wishlist"}
     )
-    @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "201",
-                    description = "Product added to wishlist successfully"
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized - Invalid or missing JWT token",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "404",
-                    description = "Product not found or user not found"
-            )
-    })
     @PostMapping("/add/{productId}")
     public ResponseEntity<?> addProductToWishlist(
             @Parameter(description = "Product ID to add to wishlist", required = true, example = "65abc123def456789012")
@@ -126,21 +92,6 @@ public class WishlistController {
                     "Requires JWT authentication.",
             tags = {"Wishlist"}
     )
-    @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "204",
-                    description = "Product removed from wishlist successfully"
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized - Invalid or missing JWT token",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "404",
-                    description = "User not found"
-            )
-    })
     @DeleteMapping("/remove/{productId}")
     public ResponseEntity<?> removeProductFromWishlist(
             @Parameter(description = "Product ID to remove from wishlist", required = true, example = "65abc123def456789012")
