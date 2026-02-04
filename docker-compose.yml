@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  quickcart-backend:
+    build: .
+    container_name: quickcart-app
+    ports:
+      - "8080:8080"
+    environment:
+      # MongoDB Configuration
+      - MONGO_URI=${MONGO_URI}
+
+      # Mail Configuration
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+
+      # Stripe Configuration
+      - STRIPE_API_KEY=${STRIPE_API_KEY}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+
+      # Security
+      - JWT_SECRET=${JWT_SECRET}
+
+      # Redis Configuration (Upstash)
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    restart: always
