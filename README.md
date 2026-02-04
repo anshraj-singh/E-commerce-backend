@@ -1,14 +1,21 @@
-# E-Commerce Backend
+# 🛒 QuickCart-API-Service
 
-## Overview
-This is a backend service for an e-commerce platform built using Spring Boot and MongoDB. It provides functionalities for user management, product management, shopping cart, and order processing.
+## 📖 Overview
+QuickCart-API-Service is a modern e-commerce backend built using Spring Boot and MongoDB. The main goal of this project is to make the shopping experience fast and secure. I have implemented essential daily features—such as product browsing, cart management, and payment handling in an optimized and efficient way
 
-## Features
-- User Registration and Authentication (JWT)
-- Product Management (CRUD operations)
-- Shopping Cart Functionality
-- Order Processing
-- Integration with Razorpay for payment processing
+✨ Key Features
+
+🔐 Secure Login: Uses JWT (JSON Web Token) to ensure that user sessions and data remain protected.
+
+⚡ Fast Browsing: Implemented Redis caching so that product details and wishlists load instantly for a better user experience.
+
+💳 Safe Payments: Integrated the Stripe Payment Gateway to allow users to complete transactions securely.
+
+📦 Order & Stock Management: After a successful payment, the system automatically updates the stock and order status using Webhooks.
+
+🛒 Cart & Wishlist: Users can easily save their favorite items to a wishlist and place orders directly from their shopping cart.
+
+🐳 Docker Ready: The project is fully Dockerized, making it very easy to set up and run on any system or cloud platform.
 
 ## API Endpoints
 
@@ -232,7 +239,7 @@ QuickCart is an e-commerce application that allows users to register, log in, an
 - `GET /user/me`: Retrieve the current user's information (requires authentication).
 - `PUT /user/update-user`: Update user information (requires authentication).
 
-## E-Commerce Application with Stripe Payment Integration
+## QuickCart E-Commerce Application with Stripe Payment Integration
 
 ### Overview
 This project is an e-commerce application that integrates Stripe for payment processing. It allows users to place orders and handle payments seamlessly. The key components include the `PaymentService`, `OrderController`, and related classes such as `ProductRequest` and `StripeResponse`.
