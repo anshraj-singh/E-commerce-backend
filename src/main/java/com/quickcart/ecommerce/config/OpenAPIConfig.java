@@ -40,11 +40,11 @@ public class OpenAPIConfig {
     private List<Server> servers() {
         return List.of(
                 new Server()
-                        .url("http://localhost:8080")
-                        .description("Local Development Server"),
+                        .url("https://quickcart-h5r4.onrender.com")
+                        .description("Production Server (Live)"),
                 new Server()
-                        .url("https://api.quickcart.com")
-                        .description("Production Server")
+                        .url("http://localhost:8080")
+                        .description("Local Development Server")
         );
     }
 
