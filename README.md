@@ -391,3 +391,24 @@ Endpoint: GET /wishlist/me
 }
 ```
 - Note: Any POST (Add) or DELETE (Remove) operation on the wishlist will automatically clear this cache to ensure data freshness.
+
+### 1. 🔍 Interactive API Documentation (Swagger)
+The project now integrates **OpenAPI 3.0 (Swagger)**. This allows developers to visualize and interact with the API’s resources without having any of the implementation logic in place.
+* **Swagger UI URL:** `http://localhost:8080/swagger-ui.html`
+* **Features:**
+    * One-click API testing.
+    * Standardized Request/Response schemas.
+    * Built-in **JWT Bearer Token** support for protected endpoints.
+
+### 2. 🐳 Docker Implementation
+The entire application is now containerized, ensuring it runs exactly the same on your local machine, staging, and production (Render).
+* **Multi-Stage Build:** Optimized Docker image size using `eclipse-temurin:17-jdk-alpine`.
+* **Docker Compose:** Orchestrates the application with environment-specific configurations.
+
+**To run the project via Docker:**
+```powershell
+# 1. Build the JAR
+./mvnw clean package -DskipTests
+
+# 2. Spin up the container
+docker-compose up --build -d
