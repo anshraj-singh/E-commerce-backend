@@ -1,6 +1,5 @@
 package com.quickcart.ecommerce.controller;
 
-import com.quickcart.ecommerce.dto.ErrorResponse;
 import com.quickcart.ecommerce.entity.Product;
 import com.quickcart.ecommerce.entity.UserEntry;
 import com.quickcart.ecommerce.entity.Wishlist;
@@ -9,9 +8,6 @@ import com.quickcart.ecommerce.service.WishlistService;
 import com.quickcart.ecommerce.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;

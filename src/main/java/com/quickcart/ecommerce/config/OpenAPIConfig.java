@@ -4,7 +4,6 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
@@ -28,9 +27,9 @@ public class OpenAPIConfig {
     private Info apiInfo() {
         return new Info()
                 .title("QuickCart E-Commerce API")
-                .description("Production-ready RESTful API for QuickCart E-Commerce platform. " +
-                        "Features include user authentication, product management, shopping cart, " +
-                        "order processing, Stripe payment integration, and Redis caching.")
+                .description("A RESTful API for QuickCart E-Commerce platform featuring user authentication, " +
+                        "product management, shopping cart, order processing, Stripe payment integration, " +
+                        "and Redis caching.")
                 .version("1.0.0")
                 .contact(new Contact()
                         .name("Ansh Raj Singh")
