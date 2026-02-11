@@ -1,5 +1,23 @@
 # 🛒 QuickCart-API-Service
 
+<div align="center">
+
+![GitHub Repo Size](https://img.shields.io/github/repo-size/anshraj-singh/QuickCart-API-Service?style=for-the-badge&logo=github)
+![Java](https://img.shields.io/badge/Java-17-orange?style=for-the-badge&logo=java)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.x-green?style=for-the-badge&logo=spring-boot)
+![Docker](https://img.shields.io/badge/Docker-Ready-blue?style=for-the-badge&logo=docker)
+![Redis](https://img.shields.io/badge/Redis-Caching-red?style=for-the-badge&logo=redis)
+
+---
+
+[**🌐 Explore Live API Documentation**](https://quickcart-h5r4.onrender.com/swagger-ui.html)
+
+</div>
+
+---
+📌Important Note:
+This project is hosted on Render’s Free Tier. If the application is in sleep mode, the initial load may take around 60 seconds. Once it wakes up, the APIs will work normally and respond faster.
+
 ## 📖 Overview
 QuickCart-API-Service is a modern e-commerce backend built using Spring Boot and MongoDB. The main goal of this project is to make the shopping experience fast and secure. I have implemented essential daily features—such as product browsing, cart management, and payment handling in an optimized and efficient way
 
